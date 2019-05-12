@@ -7,6 +7,10 @@ import string
 import db
 from collections import defaultdict
 
+# Tels us in which folder are html files
+DOCUMENT_ROOT = '../data'
+
+
 # TODO removed set(stopwords.words("slovenian")).union + ---> TODO check if stopwords slovenian are available?
 # TODO refactor
 stop_words_slovene = set(
@@ -100,10 +104,25 @@ def store_indexes(document_name, indexes):
         db.insert_posting(key, document_name, len(indexes[key]), ",".join([str(x) for x in indexes[key]]))
 
 
+def get_document_paths():
+    file_list = []
+    for folder in os.listdir(DOCUMENT_ROOT):
+        for file in os.listdir('{0}/{1}'.format(DOCUMENT_ROOT,folder)):
+            if file.endswith('.html'):
+                file_list.append('{0}/{1}'.format(folder,file))
+    return file_list
+
+
+def index_files():
+    for file_name in get_document_paths():
+        relative_p = '{0}/{1}'.format(DOCUMENT_ROOT,file_name)
+        words = get_page_words(relative_p)
+        indexes = build_word_indexes(words)
+        store_indexes(file_name, indexes)
+
+
 if __name__ == '__main__':
-    DOC_NAME = '../data/e-prostor.gov.si/e-prostor.gov.si.1.html'
-    words = get_page_words(DOC_NAME)
 
-    indexes = build_word_indexes(words)
+    index_files()
 
-    store_indexes(DOC_NAME, indexes)
+

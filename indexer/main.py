@@ -6,6 +6,8 @@ import string
 import db
 from collections import defaultdict
 from stopwords import stop_words_slovene
+import time
+from tabulate import tabulate
 
 # Tels us in which folder are html files
 DOCUMENT_ROOT = '../data'
@@ -79,7 +81,30 @@ def index_files():
         store_indexes(file_name, indexes)
 
 
-if __name__ == '__main__':
+def search(expression):
+    # Start measuring time
+    start = time.time()
 
-    index_files()
+    parts = [normalize_word(x) for x in expression.split(' ')]
+    documents = db.search_words_in_index(parts)
+
+    results = []
+
+    for doc in documents:
+        document = doc[1]
+        freq = doc[2]
+        text = 'TODO'
+        results.append([freq, document, text])
+
+    print('Result for query {0}: \n'.format(expression))
+    print('Result found in {0}ms'.format(round(time.time() - start, 2)))
+    print(tabulate(results, headers=['Frequencies', 'Document', 'Snippet']))
+
+
+if __name__ == '__main__':
+    # Uncomment this line to build indexes
+    # index_files()
+
+    # Search example
+    search("Sistem SPOT")
 

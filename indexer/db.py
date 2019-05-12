@@ -21,7 +21,6 @@ def insert_word(word, commit=False):
 
 
 def insert_posting(word, document_name, frequency, indexes):
-    print('to insert: ' + "INSERT INTO Posting VALUES ('{0}','{1}',{2},'{3}')".format(word, document_name, frequency, indexes))
     try:
         insert_word(word)
         cursor.execute("INSERT INTO Posting VALUES ('{0}','{1}',{2},'{3}')".format(word, document_name, frequency, indexes))
@@ -29,4 +28,12 @@ def insert_posting(word, document_name, frequency, indexes):
     except Exception as e:
         print('Exception (insert_posting): ')
         print(e)
+
+
+def search_words_in_index(word_list):
+    # Build condition
+    condition = ' OR '.join(["word='{0}'".format(w) for w in word_list])
+
+    res = cursor.execute("SELECT * FROM Posting WHERE  {0} ORDER BY frequency DESC ".format(condition))
+    return res.fetchall()
 

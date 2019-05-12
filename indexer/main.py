@@ -4,7 +4,8 @@ import html2text
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import string
-
+import db
+from collections import defaultdict
 
 # TODO removed set(stopwords.words("slovenian")).union + ---> TODO check if stopwords slovenian are available?
 # TODO refactor
@@ -83,10 +84,26 @@ def get_page_words(filepath):
         normalized = normalize_word(w)
         if normalized not in stop_words_slovene and normalized not in string.punctuation:
             filtered.append(normalized)
-    print(filtered)
-    print(len(filtered))
+    return filtered
+
+
+def build_word_indexes(word_list):
+    index = defaultdict(list)
+    for i in range(len(word_list)):
+        word = word_list[i]
+        index[word].append(i)
+    return index
+
+
+def store_indexes(document_name, indexes):
+    for key in indexes.keys():
+        db.insert_posting(key, document_name, len(indexes[key]), ",".join([str(x) for x in indexes[key]]))
 
 
 if __name__ == '__main__':
-    get_page_words('../data/e-prostor.gov.si/e-prostor.gov.si.1.html')
+    DOC_NAME = '../data/e-prostor.gov.si/e-prostor.gov.si.1.html'
+    words = get_page_words(DOC_NAME)
 
+    indexes = build_word_indexes(words)
+
+    store_indexes(DOC_NAME, indexes)

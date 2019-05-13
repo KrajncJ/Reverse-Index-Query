@@ -43,19 +43,16 @@ def get_page_words(filepath):
     page_data = read_data(filepath)
     html_text = extract_text_from_html(page_data)
     all_tokens = word_tokenize(html_text)
-    filtered = []
-    for w in all_tokens:
-        normalized = normalize_word(w)
-        if normalized not in stop_words_slovene and normalized not in string.punctuation:
-            filtered.append(normalized)
-    return filtered
+    return all_tokens
 
 
 def build_word_indexes(word_list):
     index = defaultdict(list)
     for i in range(len(word_list)):
         word = word_list[i]
-        index[word].append(i)
+        normalized = normalize_word(word)
+        if normalized not in stop_words_slovene and normalized not in string.punctuation:
+            index[word].append(i)
     return index
 
 
@@ -73,12 +70,19 @@ def get_document_paths():
     return file_list
 
 
-def index_files():
-    for file_name in get_document_paths():
+def index_files(display_progress=False):
+    to_index = get_document_paths()
+    processed = 0
+    all = len(to_index)
+    for file_name in to_index:
+        processed += 1
+        if display_progress:
+            print('In progress: {0} -> ({1} of {2})'.format(file_name, processed, all))
         relative_p = '{0}/{1}'.format(DOCUMENT_ROOT,file_name)
         words = get_page_words(relative_p)
         indexes = build_word_indexes(words)
         store_indexes(file_name, indexes)
+
 
 
 def search(expression):
@@ -103,8 +107,7 @@ def search(expression):
 
 if __name__ == '__main__':
     # Uncomment this line to build indexes
-    # index_files()
-
+    index_files(display_progress=True)
     # Search example
-    search("Sistem SPOT")
+    # search("Sistem SPOT")
 

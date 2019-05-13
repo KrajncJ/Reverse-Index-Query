@@ -52,7 +52,7 @@ def build_word_indexes(word_list):
         word = word_list[i]
         normalized = normalize_word(word)
         if normalized not in stop_words_slovene and normalized not in string.punctuation:
-            index[word].append(i)
+            index[normalized].append(i)
     return index
 
 
@@ -84,6 +84,17 @@ def index_files(display_progress=False):
         store_indexes(file_name, indexes)
 
 
+def build_one_snippet(words, around_index, words_around=3):
+    from_index = max(around_index-words_around, 0)
+    to_index = min(around_index+words_around+1, len(words))
+    return " ".join(words[from_index:to_index])
+
+
+def build_search_snippet(document_name, word_indexes):
+    # @TODO This part here is pretty slow. Should optimise this if needed.
+    words = get_page_words('{0}/{1}'.format(DOCUMENT_ROOT, document_name))
+    return ' ... '.join([build_one_snippet(words, int(index)) for index in word_indexes])
+
 
 def search(expression):
     # Start measuring time
@@ -91,13 +102,11 @@ def search(expression):
 
     parts = [normalize_word(x) for x in expression.split(' ')]
     documents = db.search_words_in_index(parts)
-
     results = []
-
     for doc in documents:
         document = doc[1]
         freq = doc[2]
-        text = 'TODO'
+        text = build_search_snippet(document, doc[3].split(','))
         results.append([freq, document, text])
 
     print('Result for query {0}: \n'.format(expression))
@@ -107,7 +116,6 @@ def search(expression):
 
 if __name__ == '__main__':
     # Uncomment this line to build indexes
-    index_files(display_progress=True)
+    # index_files(display_progress=True)
     # Search example
-    # search("Sistem SPOT")
-
+    search("Inšpekcijskemu")

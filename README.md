@@ -16,3 +16,5 @@ If you have any troubles with nltk word_tokenize try to run this command
 import nltk;
 nltk.download('punkt')
 ``
+
+https://docs.google.com/document/d/1W9NyHONj4kwix8Fn5gMVgc0Z7-w-ujTBl0cfI7FLjDA/edit?usp=sharing
